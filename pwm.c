@@ -143,13 +143,14 @@ pwm_intr_handler(void)
 		if (ticks) {
 			if (ticks >= 16) {
 				// constant interrupt overhead
-				ticks -= 9;
+				ticks -= 2; // 160mHz https://github.com/StefanBruens/ESP8266_new_pwm/issues/15
 				timer->frc1_int &= ~FRC1_INT_CLR_MASK;
 				WRITE_PERI_REG(&timer->frc1_load, ticks);
 				return;
 			}
 
-			ticks *= 4;
+			ticks *= 10; // 160mHz https://github.com/StefanBruens/ESP8266_new_pwm/issues/15
+      ticks -= 8; // 160mHz https://github.com/StefanBruens/ESP8266_new_pwm/issues/15
 			do {
 				ticks -= 1;
 				// stop compiler from optimizing delay loop to noop
@@ -339,7 +340,7 @@ _pwm_phases_prep(struct pwm_phase* pwm)
 		pwm[n].ticks =
 			pwm[n + 1].ticks - pwm[n].ticks;
 		// subtract common overhead
-		pwm[n].ticks--;
+		// pwm[n].ticks--; // 160mHz https://github.com/StefanBruens/ESP8266_new_pwm/issues/15
 	}
 	pwm[phases].ticks = 0;
 
